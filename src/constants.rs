@@ -52,8 +52,6 @@ pub const CONFIG_URI_OFFSET: usize = STRING_LEN_SIZE + CONFIG_NAME_OFFSET + MAX_
 
 pub const MINT_LAYOUT: u64 = 82;
 
-pub const VALID_CATEGORIES: [&str; 5] = ["image", "video", "audio", "vr", "html"];
-
 pub const DEFAULT_UUID: &str = "000000";
 
 /// Maximum number of concurrent tasks (this is important for tasks that handle files
@@ -111,13 +109,3 @@ pub const ERROR_EMOJI: Emoji<'_, '_> = Emoji("🛑 ", "");
 pub const WARNING_EMOJI: Emoji<'_, '_> = Emoji("⚠️ ", "");
 
 pub const SIGNING_EMOJI: Emoji<'_, '_> = Emoji("✍️ ", "");
-
-pub const ICE_CUBE_EMOJI: Emoji<'_, '_> = Emoji("🧊 ", "");
-
-pub const FIRE_EMOJI: Emoji<'_, '_> = Emoji("🔥 ", "");
-
-pub const RIGHT_ARROW_EMOJI: Emoji<'_, '_> = Emoji("➡️ ", "");
-
-pub const MONEY_BAG_EMOJI: Emoji<'_, '_> = Emoji("💰 ", "");
-
-pub const MAX_FREEZE_DAYS: u8 = 31;

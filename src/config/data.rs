@@ -10,6 +10,7 @@ pub use anyhow::{anyhow, Result};
 use chrono::prelude::*;
 use dateparser::DateTimeUtc;
 use mpl_candy_machine::{
+    state::{UseMethod as candyUseMethod, Uses as candyUses},
     Creator as CandyCreator, EndSettingType as CandyEndSettingType,
     EndSettings as CandyEndSettings, GatekeeperConfig as CandyGatekeeperConfig,
     HiddenSettings as CandyHiddenSettings, WhitelistMintMode as CandyWhitelistMintMode,
@@ -59,8 +60,6 @@ pub struct ConfigData {
 
     pub hidden_settings: Option<HiddenSettings>,
 
-    pub freeze_time: Option<i64>,
-
     pub upload_method: UploadMethod,
 
     pub retain_authority: bool,
@@ -78,6 +77,7 @@ pub struct ConfigData {
 
     #[serde(serialize_with = "to_option_string")]
     pub shdw_storage_account: Option<String>,
+    pub uses: Option<Uses>,
 }
 
 pub fn to_string<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
@@ -231,6 +231,37 @@ impl EndSettings {
                     number,
                 })
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum UseMethod {
+    Burn,
+    Multiple,
+    Single,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Uses {
+    pub use_method: UseMethod,
+    pub remaining: u64,
+    pub total: u64,
+}
+
+impl Uses {
+    pub fn to_candy_format(&self) -> candyUses {
+        let use_method = match self.use_method {
+            UseMethod::Burn => candyUseMethod::Burn,
+            UseMethod::Multiple => candyUseMethod::Multiple,
+            UseMethod::Single => candyUseMethod::Single,
+        };
+        candyUses {
+            use_method,
+            remaining: self.remaining,
+            total: self.total,
         }
     }
 }

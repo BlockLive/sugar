@@ -22,6 +22,7 @@ pub fn get_config_data(config_path: &str) -> Result<ConfigData, ConfigError> {
             return Err(error);
         }
     };
+
     // checks that the config is a file and not a directory
     if metadata(config_path).unwrap().is_dir() {
         let error = ConfigError::InvalidPathError(config_path.to_string());
