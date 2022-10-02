@@ -485,7 +485,12 @@ read -r -d $'\0' METADATA <<-EOM
             "uri": "%s",
             "type": "%s"
         }%b
-        "category": "%s"
+        "category": "Sugar Test"
+    },
+    "uses" :{
+        "useMethod": "single",
+        "remaining": 1,
+        "total": 1
     }
 }
 EOM
@@ -504,7 +509,12 @@ read -r -d $'\0' COLLECTION <<-EOM
             "uri": "collection.png",
             "type": "image/png"
         }],
-        "category": "image"
+        "category": "Sugar Test Collection"
+    },
+    "uses" :{
+        "useMethod": "single",
+        "remaining": 1,
+        "total": 1
     }
 }
 EOM
@@ -548,15 +558,13 @@ if [ $RESUME -eq 0 ]; then
             MEDIA_TYPE="image/$EXT"
             ANIMATION_URL=","
             ANIMATION_FILE="],"
-            CATEGORY="image"
             cp "$ASSETS_DIR/template_image.$EXT" "$ASSETS_DIR/$i.$EXT"
             if [ "$ANIMATION" = 1 ]; then
                 cp "$ASSETS_DIR/template_animation.mp4" "$ASSETS_DIR/$i.mp4"
                 ANIMATION_URL=",\n\t\"animation_url\": \"$i.mp4\","
                 ANIMATION_FILE=",\n\t\t{\n\t\t\t\"uri\": \"$i.mp4\",\n\t\t\t\"type\": \"video/mp4\"\n\t\t}],"
-                CATEGORY="video"
             fi
-            printf "$METADATA" "$NAME" "$NAME" "$MEDIA_NAME" "$ANIMATION_URL" "$MEDIA_NAME" "$MEDIA_TYPE" "$ANIMATION_FILE" "$CATEGORY" > "$ASSETS_DIR/$i.json"
+            printf "$METADATA" "$NAME" "$NAME" "$MEDIA_NAME" "$ANIMATION_URL" "$MEDIA_NAME" "$MEDIA_TYPE" "$ANIMATION_FILE" > "$ASSETS_DIR/$i.json"
         done
         rm "$ASSETS_DIR/template_image.$EXT"
         # quietly removes the animation template (it might not exist)
@@ -640,7 +648,12 @@ cat >$CONFIG_FILE <<-EOM
       "address": "$(solana address)",
       "share": 100
     }
-  ]
+  ],
+   "uses" :{
+        "useMethod": "single",
+        "remaining": 1,
+        "total": 1
+    }
 }
 EOM
 
@@ -724,7 +737,7 @@ function verify {
 
 # extracts the collection mint from the output of show command
 function collection_mint() {
-    local RESULT=`$SUGAR_BIN show --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC | grep "collection" | cut -d ':' -f 3 | tr -d '"'`
+    local RESULT=`$SUGAR_BIN show --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC | grep "collection" | cut -d ':' -f 3`
     EXIT_CODE=$?
     if [ ! $EXIT_CODE -eq 0 ]; then
         MAG "<<<"
@@ -753,115 +766,115 @@ echo "[$(date "+%T")] Building sugar binary..."
 cargo build
 echo ""
 
-if [ "${HIDDEN}" = "Y" ]; then
-    echo "[$(date "+%T")] Config with hidden settings"
-fi
+# if [ "${HIDDEN}" = "Y" ]; then
+#     echo "[$(date "+%T")] Config with hidden settings"
+# fi
 
-if [ "$LAUNCH" = "Y" ]; then
-    echo ""
-    CYN "Executing Sugar launch: steps [1, 2, 3, 4]"
-    echo ""
-    MAG ">>>"
-    $SUGAR_BIN launch -c ${CONFIG_FILE} --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC $ASSETS_DIR --skip-collection-prompt
-    EXIT_CODE=$?
-    MAG "<<<"
+# if [ "$LAUNCH" = "Y" ]; then
+#     echo ""
+#     CYN "Executing Sugar launch: steps [1, 2, 3, 4]"
+#     echo ""
+#     MAG ">>>"
+#     $SUGAR_BIN launch -c ${CONFIG_FILE} --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC $ASSETS_DIR --skip-collection-prompt
+#     EXIT_CODE=$?
+#     MAG "<<<"
     
-    if [ ! $EXIT_CODE -eq 0 ]; then
-        RED "[$(date "+%T")] Aborting: launch failed"
-        exit 1
-    fi
-else
-    echo ""
-    CYN "1. Validating JSON metadata files"
-    echo ""
-    MAG ">>>"
-    $SUGAR_BIN validate $ASSETS_DIR --skip-collection-prompt
-    EXIT_CODE=$?
-    MAG "<<<"
+#     if [ ! $EXIT_CODE -eq 0 ]; then
+#         RED "[$(date "+%T")] Aborting: launch failed"
+#         exit 1
+#     fi
+# else
+#     echo ""
+#     CYN "1. Validating JSON metadata files"
+#     echo ""
+#     MAG ">>>"
+#     $SUGAR_BIN validate $ASSETS_DIR --skip-collection-prompt
+#     EXIT_CODE=$?
+#     MAG "<<<"
 
-    if [ ! $EXIT_CODE -eq 0 ]; then
-        RED "[$(date "+%T")] Aborting: validation failed"
-        exit 1
-    fi
+#     if [ ! $EXIT_CODE -eq 0 ]; then
+#         RED "[$(date "+%T")] Aborting: validation failed"
+#         exit 1
+#     fi
 
-    echo ""
-    CYN "2. Uploading assets"
-    echo ""
-    MAG ">>>"
-    upload
-    MAG "<<<"
-    echo ""
+#     echo ""
+#     CYN "2. Uploading assets"
+#     echo ""
+#     MAG ">>>"
+#     upload
+#     MAG "<<<"
+#     echo ""
 
-    echo ""
-    CYN "3. Deploying Candy Machine"
-    echo ""
-    MAG ">>>"
-    deploy
-    MAG "<<<"
-    echo ""
+#     echo ""
+#     CYN "3. Deploying Candy Machine"
+#     echo ""
+#     MAG ">>>"
+#     deploy
+#     MAG "<<<"
+#     echo ""
 
-    echo ""
-    CYN "4. Verifying deployment"
-    echo ""
-    MAG ">>>"
-    verify
-    MAG "<<<"
-fi
+#     echo ""
+#     CYN "4. Verifying deployment"
+#     echo ""
+#     MAG ">>>"
+#     verify
+#     MAG "<<<"
+# fi
 
-echo ""
-if [ ! "$MANUAL_CACHE" == "Y" ]; then
-    CYN "5. Verifying collection mint"
-    echo ""
-    COLLECTION_PDA=$(collection_mint)
+# echo ""
+# if [ ! "$MANUAL_CACHE" == "Y" ]; then
+#     CYN "5. Verifying collection mint"
+#     echo ""
+#     COLLECTION_PDA=$(collection_mint)
 
-    if [ -z ${COLLECTION_PDA} ]; then
-        RED "[$(date "+%T")] Aborting: collection mint not found"
-        exit 1
-    fi
+#     if [ -z ${COLLECTION_PDA} ]; then
+#         RED "[$(date "+%T")] Aborting: collection mint not found"
+#         exit 1
+#     fi
 
-    echo "Collection mint:$(GRN "$COLLECTION_PDA")"
-    echo ""
+#     echo "Collection mint:$(GRN "$COLLECTION_PDA")"
+#     echo ""
 
-    MAG "Removing collection >>>"
-    $SUGAR_BIN collection remove --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC
-    MAG "<<<"
+#     MAG "Removing collection >>>"
+#     $SUGAR_BIN collection remove --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC
+#     MAG "<<<"
 
-    # checking that the collection PDA was removed
-    NONE=$(collection_mint)
+#     # checking that the collection PDA was removed
+#     NONE=$(collection_mint)
 
-    if [ ! "$NONE" == " none" ]; then
-        RED "[$(date "+%T")] Aborting: collection mint still present"
-        exit 1
-    fi
+#     if [ ! "$NONE" == " none" ]; then
+#         RED "[$(date "+%T")] Aborting: collection mint still present"
+#         exit 1
+#     fi
 
-    echo ""
-    MAG "Setting collection >>>"
-    $SUGAR_BIN collection set --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC $COLLECTION_PDA
-    MAG "<<<"
+#     echo ""
+#     MAG "Setting collection >>>"
+#     $SUGAR_BIN collection set --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC $COLLECTION_PDA
+#     MAG "<<<"
 
-    # checking that the collection PDA was set
-    COLLECTION_PDA=$(collection_mint)
+#     # checking that the collection PDA was set
+#     COLLECTION_PDA=$(collection_mint)
 
-    if [ -z ${COLLECTION_PDA} ]; then
-        RED "[$(date "+%T")] Aborting: collection mint not found"
-        exit 1
-    fi
-else
-    CYN "5. Verifying collection mint (Skipped)"
-fi
+#     if [ -z ${COLLECTION_PDA} ]; then
+#         RED "[$(date "+%T")] Aborting: collection mint not found"
+#         exit 1
+#     fi
+# else
+#     CYN "5. Verifying collection mint (Skipped)"
+# fi
 
-echo ""
-if [ "${CHANGE}" = "Y" ]; then
-    CYN "6. Editing cache and testing re-deploy"
-    echo ""
-    MAG ">>>"
-    change_cache
-    deploy
-    verify
-    MAG "<<<"
-else
-    CYN "6. Editing cache and testing re-deploy (Skipped)"
-fi
+# echo ""
+# if [ "${CHANGE}" = "Y" ]; then
+#     CYN "6. Editing cache and testing re-deploy"
+#     echo ""
+#     MAG ">>>"
+#     change_cache
+#     deploy
+#     verify
+#     MAG "<<<"
+# else
+#     CYN "6. Editing cache and testing re-deploy (Skipped)"
+# fi
 
 echo ""
 CYN "7. Minting"

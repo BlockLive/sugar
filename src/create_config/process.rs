@@ -17,7 +17,8 @@ use crate::{
     candy_machine::CANDY_MACHINE_ID,
     config::{
         parse_string_as_date, AwsConfig, ConfigData, Creator, EndSettingType, EndSettings,
-        GatekeeperConfig, HiddenSettings, UploadMethod, WhitelistMintMode, WhitelistMintSettings,
+        GatekeeperConfig, HiddenSettings, UploadMethod, UseMethod, Uses, WhitelistMintMode,
+        WhitelistMintSettings,
     },
     constants::*,
     setup::{setup_client, sugar_setup},
@@ -111,20 +112,6 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
         if value > 10_000 {
             Err(String::from(
                 "Seller fee basis points must be 10,000 or less.",
-            ))
-        } else {
-            Ok(())
-        }
-    };
-
-    let freeze_time_validator = |input: &String| -> Result<(), String> {
-        let value = match input.parse::<u8>() {
-            Ok(value) => value,
-            Err(_) => return Err(format!("Couldn't parse input of '{}' to a number.", input)),
-        };
-        if value > MAX_FREEZE_DAYS {
-            Err(String::from(
-                "Freeze time cannot be greater than {MAX_FREEZE_DAYS} days.",
             ))
         } else {
             Ok(())
@@ -347,7 +334,7 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
     const WL_INDEX: usize = 2;
     const END_SETTINGS_INDEX: usize = 3;
     const HIDDEN_SETTINGS_INDEX: usize = 4;
-    const FREEZE_SETTINGS_INDEX: usize = 5;
+    const USES_INDEX: usize = 5;
 
     let extra_functions_options = vec![
         "SPL Token Mint",
@@ -355,7 +342,7 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
         "Whitelist Mint",
         "End Settings",
         "Hidden Settings",
-        "Freeze Settings",
+        "Uses",
     ];
 
     let choices = MultiSelect::with_theme(&theme)
@@ -490,6 +477,38 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
     } else {
         None
     };
+    config_data.uses = if choices.contains(&USES_INDEX) {
+        let use_methods = vec!["Burn", "Single", "Multiple"];
+        let use_method = match Select::with_theme(&theme)
+            .with_prompt("What use method do you prefer?")
+            .items(&use_methods)
+            .default(0)
+            .interact()
+            .unwrap()
+        {
+            0 => UseMethod::Burn,
+            1 => UseMethod::Single,
+            2 => UseMethod::Multiple,
+            _ => panic!("Invalid use method"),
+        };
+
+        let total = Input::with_theme(&theme)
+            .with_prompt("What is the total amout of uses?")
+            .validate_with(number_validator)
+            .validate_with(number_validator)
+            .interact()
+            .unwrap()
+            .parse::<u64>()
+            .expect("Failed to parse number into u64 that should have already been validated.");
+
+        Some(Uses {
+            use_method,
+            total,
+            remaining: total,
+        })
+    } else {
+        None
+    };
 
     // end settings
 
@@ -584,23 +603,8 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
         None
     };
 
-    // Freeze Settings
-    config_data.freeze_time = if choices.contains(&FREEZE_SETTINGS_INDEX) {
-        let days = Input::with_theme(&theme)
-                 .with_prompt("How many days do you want to freeze the treasury funds and minted NFTs for? (Max: 31)")
-                 .validate_with(freeze_time_validator)
-                 .default(MAX_FREEZE_DAYS.to_string())
-                 .interact()
-                 .unwrap()
-                 .parse::<u8>().expect("Failed to parse number into u64 that should have already been validated.");
-
-        // convert to i64 of seconds, for storing in config and to match candy machine value
-        Some(days as i64 * 86400)
-    } else {
-        None
-    };
-
     // upload method
+
     let upload_options = vec!["Bundlr", "AWS", "NFT Storage", "SHDW"];
     config_data.upload_method = match Select::with_theme(&theme)
         .with_prompt("What upload method do you want to use?")
@@ -657,11 +661,13 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
     }
 
     // retain authority
+
     config_data.retain_authority = Confirm::with_theme(&theme)
         .with_prompt("Do you want to retain update authority on your NFTs? We HIGHLY recommend you choose yes.")
         .interact()?;
 
     // is mutable
+
     config_data.is_mutable = Confirm::with_theme(&theme)
         .with_prompt("Do you want your NFTs to remain mutable? We HIGHLY recommend you choose yes.")
         .interact()?;

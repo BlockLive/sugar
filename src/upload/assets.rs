@@ -41,7 +41,7 @@ impl AssetPair {
             metadata_link: String::new(),
             on_chain: false,
             animation_hash: self.animation_hash,
-            animation_link: None,
+            animation_link: self.animation,
         }
     }
 }
@@ -132,7 +132,7 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
     let paths_ref = &paths;
 
     let animation_exists_regex =
-        Regex::new("^(.+)\\.((mp3)|(mp4)|(mov)|(webm)|(glb))$").expect("Failed to create regex.");
+        Regex::new("^(.+)\\.((mp3)|(mp4)|(mov)|(webm))$").expect("Failed to create regex.");
 
     // since there doesn't have to be video for each image/json pair, need to get rid of
     // invalid file names before entering metadata filename loop
@@ -202,7 +202,7 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
         // need a similar check for animation as above, this one checking if there is animation
         // on specific index
 
-        let animation_pattern = format!("^{}\\.((mp3)|(mp4)|(mov)|(webm)|(glb))$", i);
+        let animation_pattern = format!("^{}\\.((mp3)|(mp4)|(mov)|(webm))$", i);
         let animation_regex = RegexBuilder::new(&animation_pattern)
             .case_insensitive(true)
             .build()
@@ -345,11 +345,7 @@ pub fn get_updated_metadata(
     }
 
     metadata.image = image_link.to_string();
-
-    if animation_link.is_some() {
-        // only updates the link if we have a new value
-        metadata.animation_url = animation_link.clone();
-    }
+    metadata.animation_url = animation_link.clone();
 
     Ok(serde_json::to_string(&metadata).unwrap())
 }

@@ -82,9 +82,6 @@ pub fn process_validate(args: ValidateArgs) -> Result<()> {
         .map(Result::unwrap)
         .collect();
 
-    // Validating continuous assets in directory
-    validate_continuous_assets(&paths)?;
-
     let pb = spinner_with_style();
     pb.enable_steady_tick(120);
     pb.set_message(format!("Validating {} metadata file(s)...", paths.len()));
@@ -103,7 +100,7 @@ pub fn process_validate(args: ValidateArgs) -> Result<()> {
             }
         };
 
-        let mut metadata = match serde_json::from_reader::<File, Metadata>(f) {
+        let metadata = match serde_json::from_reader::<File, Metadata>(f) {
             Ok(metadata) => metadata,
             Err(error) => {
                 error!("{}: {}", path.display(), error);
