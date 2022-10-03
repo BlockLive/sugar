@@ -217,7 +217,7 @@ pub async fn process_deploy(args: DeployArgs) -> Result<()> {
         );
 
         spinner.finish_and_clear();
-        }
+    }
 
     println!("{} {}", style("Candy machine ID:").bold(), candy_pubkey);
 
