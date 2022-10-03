@@ -486,6 +486,11 @@ read -r -d $'\0' METADATA <<-EOM
             "type": "%s"
         }%b
         "category": "%s"
+    },
+    "uses" :{
+        "useMethod": "single",
+        "remaining": 1,
+        "total": 1
     }
 }
 EOM
@@ -505,6 +510,11 @@ read -r -d $'\0' COLLECTION <<-EOM
             "type": "image/png"
         }],
         "category": "image"
+    },
+    "uses" :{
+        "useMethod": "single",
+        "remaining": 1,
+        "total": 1
     }
 }
 EOM
@@ -640,7 +650,12 @@ cat >$CONFIG_FILE <<-EOM
       "address": "$(solana address)",
       "share": 100
     }
-  ]
+  ],
+   "uses" :{
+        "useMethod": "single",
+        "remaining": 1,
+        "total": 1
+    }
 }
 EOM
 

@@ -219,6 +219,8 @@ fn create_candy_machine_data(
         .map(|c| c.to_candy_format())
         .collect::<Result<Vec<mpl_candy_machine::Creator>>>()?;
 
+    let uses = config.uses.as_ref().map(|uses| uses.to_candy_format());
+
     let data = CandyMachineData {
         uuid: candy_machine.uuid.clone(),
         price,
@@ -234,6 +236,7 @@ fn create_candy_machine_data(
         hidden_settings,
         items_available: config.number,
         gatekeeper,
+        uses,
     };
     Ok(data)
 }

@@ -75,16 +75,16 @@ pub fn process_unfreeze_funds(args: UnlockFundsArgs) -> Result<()> {
 pub fn unlock_funds(
     program: &Program,
     candy_machine_id: &Pubkey,
-    treasury: Pubkey,
+    _treasury: Pubkey,
 ) -> Result<Signature> {
     let (freeze_pda, _) = find_freeze_pda(candy_machine_id);
 
+    // TODO(gtihtina): fix the trasury dep -- wallet: treasury,
     let builder = program
         .request()
         .accounts(nft_accounts::UnlockFunds {
             candy_machine: *candy_machine_id,
             authority: program.payer(),
-            wallet: treasury,
             freeze_pda,
             system_program: system_program::ID,
         })

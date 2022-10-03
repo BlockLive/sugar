@@ -78,6 +78,8 @@ pub fn create_candy_machine_data(
 
     let price = parse_config_price(client, config)?;
 
+    let uses = config.uses.as_ref().map(|uses| uses.to_candy_format());
+
     let data = CandyMachineData {
         uuid,
         price,
@@ -93,6 +95,7 @@ pub fn create_candy_machine_data(
         hidden_settings,
         items_available: config.number,
         gatekeeper,
+        uses,
     };
 
     Ok(data)

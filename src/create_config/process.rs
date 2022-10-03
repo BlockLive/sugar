@@ -17,7 +17,8 @@ use crate::{
     candy_machine::CANDY_MACHINE_ID,
     config::{
         parse_string_as_date, AwsConfig, ConfigData, Creator, EndSettingType, EndSettings,
-        GatekeeperConfig, HiddenSettings, UploadMethod, WhitelistMintMode, WhitelistMintSettings,
+        GatekeeperConfig, HiddenSettings, UploadMethod, UseMethod, Uses, WhitelistMintMode,
+        WhitelistMintSettings,
     },
     constants::*,
     setup::{setup_client, sugar_setup},
@@ -348,6 +349,7 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
     const END_SETTINGS_INDEX: usize = 3;
     const HIDDEN_SETTINGS_INDEX: usize = 4;
     const FREEZE_SETTINGS_INDEX: usize = 5;
+    const USES_INDEX: usize = 6;
 
     let extra_functions_options = vec![
         "SPL Token Mint",
@@ -356,6 +358,7 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
         "End Settings",
         "Hidden Settings",
         "Freeze Settings",
+        "Uses",
     ];
 
     let choices = MultiSelect::with_theme(&theme)
@@ -487,6 +490,38 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
             presale,
             discount_price,
         ))
+    } else {
+        None
+    };
+    config_data.uses = if choices.contains(&USES_INDEX) {
+        let use_methods = vec!["Burn", "Single", "Multiple"];
+        let use_method = match Select::with_theme(&theme)
+            .with_prompt("What use method do you prefer?")
+            .items(&use_methods)
+            .default(0)
+            .interact()
+            .unwrap()
+        {
+            0 => UseMethod::Burn,
+            1 => UseMethod::Single,
+            2 => UseMethod::Multiple,
+            _ => panic!("Invalid use method"),
+        };
+
+        let total = Input::with_theme(&theme)
+            .with_prompt("What is the total amout of uses?")
+            .validate_with(number_validator)
+            .validate_with(number_validator)
+            .interact()
+            .unwrap()
+            .parse::<u64>()
+            .expect("Failed to parse number into u64 that should have already been validated.");
+
+        Some(Uses {
+            use_method,
+            total,
+            remaining: total,
+        })
     } else {
         None
     };
