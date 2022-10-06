@@ -16,6 +16,7 @@ use mpl_candy_machine::{
     HiddenSettings as CandyHiddenSettings, WhitelistMintMode as CandyWhitelistMintMode,
     WhitelistMintSettings as CandyWhitelistMintSettings,
 };
+use mpl_token_metadata::state;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::config::errors::*;
@@ -262,6 +263,18 @@ impl Uses {
             UseMethod::Single => candyUseMethod::Single,
         };
         candyUses {
+            use_method,
+            remaining: self.remaining,
+            total: self.total,
+        }
+    }
+    pub fn to_mpl_format(&self) -> state::Uses {
+        let use_method = match self.use_method {
+            UseMethod::Burn => state::UseMethod::Burn,
+            UseMethod::Multiple => state::UseMethod::Multiple,
+            UseMethod::Single => state::UseMethod::Single,
+        };
+        state::Uses {
             use_method,
             remaining: self.remaining,
             total: self.total,

@@ -2,7 +2,7 @@ use std::{thread, time::Duration};
 
 use anchor_lang::AccountDeserialize;
 use console::style;
-use mpl_candy_machine::CandyMachine;
+use mpl_candy_machine::{constants, CandyMachine};
 
 use crate::{
     cache::*,
@@ -101,13 +101,12 @@ pub fn process_verify(args: VerifyArgs) -> Result<()> {
         };
 
         for i in 0..num_items {
-            let name_start = CONFIG_ARRAY_START
+            let name_start = constants::CONFIG_ARRAY_START
                 + STRING_LEN_SIZE
                 + CONFIG_LINE_SIZE * (i as usize)
                 + CONFIG_NAME_OFFSET;
             let name_end = name_start + MAX_NAME_LENGTH;
-
-            let uri_start = CONFIG_ARRAY_START
+            let uri_start = constants::CONFIG_ARRAY_START
                 + STRING_LEN_SIZE
                 + CONFIG_LINE_SIZE * (i as usize)
                 + CONFIG_URI_OFFSET;

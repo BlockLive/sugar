@@ -3,7 +3,7 @@ use anyhow::Result;
 use mpl_token_metadata::{
     instruction::{create_master_edition_v3, create_metadata_accounts_v3},
     pda::find_collection_authority_account,
-    state::{CollectionDetails, Creator},
+    state::{CollectionDetails, Creator, Uses},
 };
 use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
 use spl_token::{
@@ -34,6 +34,8 @@ pub fn create_and_set_collection(
             return Err(anyhow!("Trying to create and set collection when collection item info isn't in cache! This shouldn't happen!"));
         }
     };
+
+    let uses: Option<Uses> = config_data.uses.clone().map(|uses| uses.to_mpl_format());
 
     // Allocate memory for the account
     let min_rent = program
@@ -96,7 +98,7 @@ pub fn create_and_set_collection(
         true,
         true,
         None,
-        None,
+        uses,
         Some(CollectionDetails::V1 { size: 0 }),
     );
 

@@ -4,7 +4,7 @@ use anchor_client::solana_sdk::{native_token::LAMPORTS_PER_SOL, pubkey::Pubkey};
 use anyhow::Result;
 use chrono::NaiveDateTime;
 use console::style;
-use mpl_candy_machine::{utils::is_feature_active, EndSettingType, WhitelistMintMode};
+use mpl_candy_machine::{constants, utils::is_feature_active, EndSettingType, WhitelistMintMode};
 
 use crate::{
     cache::load_cache,
@@ -261,7 +261,7 @@ pub fn process_show(args: ShowArgs) -> Result<()> {
             LOOKING_GLASS_EMOJI
         );
 
-        let mut start = CONFIG_ARRAY_START
+        let mut start = constants::CONFIG_ARRAY_START
             + STRING_LEN_SIZE
             + CONFIG_LINE_SIZE * cndy_data.items_available as usize
             + STRING_LEN_SIZE

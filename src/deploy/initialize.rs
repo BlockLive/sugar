@@ -6,7 +6,7 @@ use anchor_client::solana_sdk::{
 use anchor_lang::prelude::AccountMeta;
 use anyhow::Result;
 use mpl_candy_machine::{
-    accounts as nft_accounts, instruction as nft_instruction, CandyMachineData,
+    accounts as nft_accounts, constants, instruction as nft_instruction, CandyMachineData,
     Creator as CandyCreator,
 };
 pub use mpl_token_metadata::state::{
@@ -113,11 +113,11 @@ pub fn initialize_candy_machine(
     let items_available = candy_machine_data.items_available;
 
     let candy_account_size = if candy_machine_data.hidden_settings.is_some() {
-        CONFIG_ARRAY_START
+        constants::CONFIG_ARRAY_START
     } else {
-        CONFIG_ARRAY_START
+        constants::CONFIG_ARRAY_START
             + 4
-            + items_available as usize * CONFIG_LINE_SIZE
+            + items_available as usize * constants::CONFIG_LINE_SIZE
             + 8
             + 2 * (items_available as usize / 8 + 1)
     };
