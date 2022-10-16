@@ -18,11 +18,11 @@ pub use anchor_client::{
 pub use anchor_lang::AccountDeserialize;
 pub use anyhow::{anyhow, Result};
 pub use bs58;
-pub use indexmap::IndexMap;
-pub use mpl_candy_machine::{
+pub use custom_candy_machine::{
     accounts as nft_accounts, instruction as nft_instruction, CandyMachine, WhitelistMintMode,
     ID as CANDY_MACHINE_PROGRAM_ID,
 };
+pub use indexmap::IndexMap;
 pub use reqwest::{Client as HttpClient, Response};
 pub use serde::Deserialize;
 pub use serde_json::{json, Value};

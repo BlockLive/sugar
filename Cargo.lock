@@ -1008,6 +1008,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "custom-candy-machine"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "arrayref",
+ "mpl-token-metadata",
+ "solana-gateway",
+ "solana-program",
+ "spl-associated-token-account",
+ "spl-token",
+]
+
+[[package]]
 name = "darling"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2300,26 +2314,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "mpl-candy-machine"
-version = "4.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75bae819b86d756a5c81107b708d626a9bdf24e32c4b0b52c2b2a00a5584095f"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "arrayref",
- "mpl-token-metadata",
- "solana-gateway",
- "solana-program",
- "spl-associated-token-account",
- "spl-token",
-]
-
-[[package]]
 name = "mpl-token-metadata"
-version = "1.3.6"
+version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3af5d66f2608f309ae54488f5e5154c98a1a860a15018426620b8ace580ed685"
+checksum = "9b5b3c874127362e9ce62fc8dc836475848c4b6259f90398f1fea461bded06aa"
 dependencies = [
  "arrayref",
  "borsh",
@@ -4514,6 +4512,7 @@ dependencies = [
  "clap 3.2.16",
  "console",
  "ctrlc",
+ "custom-candy-machine",
  "data-encoding",
  "dateparser",
  "dialoguer 0.10.2",
@@ -4524,7 +4523,6 @@ dependencies = [
  "indicatif",
  "ini",
  "lazy_static",
- "mpl-candy-machine",
  "mpl-token-metadata",
  "num_cpus",
  "phf",

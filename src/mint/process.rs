@@ -10,7 +10,7 @@ use anchor_lang::{prelude::AccountMeta, ToAccountMetas};
 use anyhow::Result;
 use chrono::Utc;
 use console::style;
-use mpl_candy_machine::{
+use custom_candy_machine::{
     accounts as nft_accounts, instruction as nft_instruction, CandyError, CandyMachine,
     CollectionPDA, EndSettingType, WhitelistMintMode,
 };

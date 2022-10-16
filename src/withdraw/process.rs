@@ -12,8 +12,8 @@ pub use anchor_client::{
     Client, Program,
 };
 use console::{style, Style};
+use custom_candy_machine::{accounts as nft_accounts, instruction as nft_instruction};
 use dialoguer::{theme::ColorfulTheme, Confirm};
-use mpl_candy_machine::{accounts as nft_accounts, instruction as nft_instruction};
 use solana_account_decoder::UiAccountEncoding;
 use solana_client::{
     rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig},

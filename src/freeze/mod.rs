@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use anchor_client::solana_sdk::pubkey::Pubkey;
 use anyhow::Result;
 use console::style;
-use mpl_candy_machine::{
+use custom_candy_machine::{
     accounts as nft_accounts,
     constants::{FREEZE_FEATURE_INDEX, FREEZE_LOCK_FEATURE_INDEX},
     instruction as nft_instruction, is_feature_active,

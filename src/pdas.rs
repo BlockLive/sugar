@@ -1,6 +1,6 @@
 use anchor_client::{solana_sdk::pubkey::Pubkey, ClientError, Program};
 use anyhow::{anyhow, Result};
-use mpl_candy_machine::CollectionPDA;
+use custom_candy_machine::CollectionPDA;
 use mpl_token_metadata::{
     pda::{find_master_edition_account, find_metadata_account},
     state::{Key, MasterEditionV2, Metadata, TokenMetadataAccount, MAX_MASTER_EDITION_LEN},

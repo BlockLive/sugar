@@ -3,7 +3,7 @@ use std::str::FromStr;
 use anchor_client::solana_sdk::pubkey::Pubkey;
 use anyhow::Result;
 use console::style;
-use mpl_candy_machine::{accounts as nft_accounts, instruction as nft_instruction};
+use custom_candy_machine::{accounts as nft_accounts, instruction as nft_instruction};
 use mpl_token_metadata::{pda::find_collection_authority_account, state::Metadata};
 
 use crate::{
