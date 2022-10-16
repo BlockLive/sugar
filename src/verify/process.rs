@@ -2,7 +2,7 @@ use std::{thread, time::Duration};
 
 use anchor_lang::AccountDeserialize;
 use console::style;
-use mpl_candy_machine::{constants, CandyMachine};
+use custom_candy_machine::{constants, CandyMachine};
 
 use crate::{
     cache::*,

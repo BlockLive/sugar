@@ -9,8 +9,8 @@ use std::{
 use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Keypair};
 use anyhow::Result;
 use console::style;
+use custom_candy_machine::{accounts as nft_accounts, instruction as nft_instruction, ConfigLine};
 use futures::future::select_all;
-use mpl_candy_machine::{accounts as nft_accounts, instruction as nft_instruction, ConfigLine};
 pub use mpl_token_metadata::state::{
     MAX_CREATOR_LIMIT, MAX_NAME_LENGTH, MAX_SYMBOL_LENGTH, MAX_URI_LENGTH,
 };

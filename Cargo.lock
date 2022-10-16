@@ -1008,6 +1008,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "custom-candy-machine"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "arrayref",
+ "mpl-token-metadata",
+ "solana-gateway",
+ "solana-program",
+ "spl-associated-token-account",
+ "spl-token",
+]
+
+[[package]]
 name = "darling"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2297,20 +2311,6 @@ dependencies = [
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys",
-]
-
-[[package]]
-name = "mpl-candy-machine"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "arrayref",
- "mpl-token-metadata",
- "solana-gateway",
- "solana-program",
- "spl-associated-token-account",
- "spl-token",
 ]
 
 [[package]]
@@ -4512,6 +4512,7 @@ dependencies = [
  "clap 3.2.16",
  "console",
  "ctrlc",
+ "custom-candy-machine",
  "data-encoding",
  "dateparser",
  "dialoguer 0.10.2",
@@ -4522,7 +4523,6 @@ dependencies = [
  "indicatif",
  "ini",
  "lazy_static",
- "mpl-candy-machine",
  "mpl-token-metadata",
  "num_cpus",
  "phf",

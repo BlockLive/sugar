@@ -4,7 +4,7 @@ use anchor_client::solana_sdk::pubkey::Pubkey;
 use anchor_lang::prelude::AccountMeta;
 use anyhow::Result;
 use console::style;
-use mpl_candy_machine::{
+use custom_candy_machine::{
     accounts as nft_accounts, instruction as nft_instruction, CandyMachineData,
 };
 use spl_associated_token_account::get_associated_token_address;
@@ -217,7 +217,7 @@ fn create_candy_machine_data(
         .clone()
         .into_iter()
         .map(|c| c.to_candy_format())
-        .collect::<Result<Vec<mpl_candy_machine::Creator>>>()?;
+        .collect::<Result<Vec<custom_candy_machine::Creator>>>()?;
 
     let uses = config.uses.as_ref().map(|uses| uses.to_candy_format());
 

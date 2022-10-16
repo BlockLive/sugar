@@ -14,7 +14,7 @@ use anchor_client::solana_sdk::{
 };
 use anyhow::Result;
 use console::style;
-use mpl_candy_machine::{constants::FREEZE_FEATURE_INDEX, utils::is_feature_active};
+use custom_candy_machine::{constants::FREEZE_FEATURE_INDEX, utils::is_feature_active};
 use spl_associated_token_account::get_associated_token_address;
 
 use crate::{

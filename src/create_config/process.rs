@@ -495,6 +495,7 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
     };
     config_data.uses = if choices.contains(&USES_INDEX) {
         let use_methods = vec!["Burn", "Single", "Multiple"];
+        let mut total: u64 = 1;
         let use_method = match Select::with_theme(&theme)
             .with_prompt("What use method do you prefer?")
             .items(&use_methods)
@@ -507,20 +508,21 @@ pub fn process_create_config(args: CreateConfigArgs) -> Result<()> {
             2 => UseMethod::Multiple,
             _ => panic!("Invalid use method"),
         };
-
-        let total = Input::with_theme(&theme)
-            .with_prompt("What is the total amout of uses?")
-            .validate_with(number_validator)
-            .validate_with(number_validator)
-            .interact()
-            .unwrap()
-            .parse::<u64>()
-            .expect("Failed to parse number into u64 that should have already been validated.");
+        if use_method == UseMethod::Multiple {
+            total = Input::with_theme(&theme)
+                .with_prompt("What is the total amout of uses?")
+                .validate_with(number_validator)
+                .validate_with(number_validator)
+                .interact()
+                .unwrap()
+                .parse::<u64>()
+                .expect("Failed to parse number into u64 that should have already been validated.");
+        }
 
         Some(Uses {
             use_method,
-            total,
             remaining: total,
+            total,
         })
     } else {
         None

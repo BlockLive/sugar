@@ -1,7 +1,7 @@
 use anchor_client::{solana_sdk::pubkey::Pubkey, Client, ClientError};
 use anyhow::{anyhow, Result};
-pub use mpl_candy_machine::ID as CANDY_MACHINE_ID;
-use mpl_candy_machine::{
+pub use custom_candy_machine::ID as CANDY_MACHINE_ID;
+use custom_candy_machine::{
     constants::FREEZE_FEATURE_INDEX, is_feature_active, CandyMachine, CandyMachineData, FreezePDA,
     WhitelistMintMode, WhitelistMintSettings,
 };
@@ -15,7 +15,7 @@ use crate::{
     utils::{check_spl_token, f64_to_u64_safe},
 };
 
-// To test a custom candy machine program, comment the mpl_candy_machine::ID line
+// To test a custom candy machine program, comment the candy_machine::ID line
 // above and use the following lines to declare the id to use:
 //
 //use solana_program::declare_id;

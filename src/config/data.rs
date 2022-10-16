@@ -8,14 +8,14 @@ use anchor_client::solana_sdk::{
 };
 pub use anyhow::{anyhow, Result};
 use chrono::prelude::*;
-use dateparser::DateTimeUtc;
-use mpl_candy_machine::{
+use custom_candy_machine::{
     state::{UseMethod as candyUseMethod, Uses as candyUses},
     Creator as CandyCreator, EndSettingType as CandyEndSettingType,
     EndSettings as CandyEndSettings, GatekeeperConfig as CandyGatekeeperConfig,
     HiddenSettings as CandyHiddenSettings, WhitelistMintMode as CandyWhitelistMintMode,
     WhitelistMintSettings as CandyWhitelistMintSettings,
 };
+use dateparser::DateTimeUtc;
 use mpl_token_metadata::state;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 

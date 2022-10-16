@@ -5,7 +5,7 @@ use anchor_client::solana_sdk::{
 };
 use anchor_lang::prelude::AccountMeta;
 use anyhow::Result;
-use mpl_candy_machine::{
+use custom_candy_machine::{
     accounts as nft_accounts, constants, instruction as nft_instruction, CandyMachineData,
     Creator as CandyCreator,
 };

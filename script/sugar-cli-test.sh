@@ -841,7 +841,7 @@ if [ ! "$MANUAL_CACHE" == "Y" ]; then
     $SUGAR_BIN collection remove --keypair $WALLET_KEY --cache $CACHE_FILE -r $RPC
     MAG "<<<"
 
-    # checking that the collection PDA was removed
+    checking that the collection PDA was removed
     NONE=$(collection_mint)
 
     if [ ! "$NONE" == " none" ]; then

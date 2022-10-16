@@ -4,7 +4,9 @@ use anchor_client::solana_sdk::{native_token::LAMPORTS_PER_SOL, pubkey::Pubkey};
 use anyhow::Result;
 use chrono::NaiveDateTime;
 use console::style;
-use mpl_candy_machine::{constants, utils::is_feature_active, EndSettingType, WhitelistMintMode};
+use custom_candy_machine::{
+    constants, utils::is_feature_active, EndSettingType, WhitelistMintMode,
+};
 
 use crate::{
     cache::load_cache,
@@ -23,7 +25,7 @@ pub struct ShowArgs {
 }
 
 // TODO: change the value '1' for the corresponding constant once the
-// new version of the mpl_candy_machine crate is published
+// new version of the candy_machine crate is published
 const SWAP_REMOVE_FEATURE_INDEX: usize = 255;
 // number of indices per line
 const PER_LINE: usize = 11;
