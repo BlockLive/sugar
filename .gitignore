@@ -1,6 +1,7 @@
 /target
 sugar.log
 /assets
+/assets1
 *.json
 test_item
 /.idea
