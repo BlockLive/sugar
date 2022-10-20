@@ -25,12 +25,12 @@ read -r -d $'\0' METADATA <<-EOM
 EOM
 
 ITEMS="30"
-EXT="png"
 NAME_PASSED="Backyard Pickleball"
 SYMBOL="BKPB"
 DESCRIPTION="Inaugural Charity Event"
 ANIMATION="1"
 ATTRIBUTES="[{\"trait_type\": \"Orientation\", \"value\": \"Spinning\"}],"
+EXT="png"
 for ((i = 0; i < $ITEMS; i++));
 do
     J=$(($i + 1))
