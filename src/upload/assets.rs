@@ -68,6 +68,31 @@ pub fn get_cache_item<'a>(path: &Path, cache: &'a mut Cache) -> Result<(String, 
     Ok((asset_id, cache_item))
 }
 
+// returns just two items (collection and media) instean of n items for n tickets
+pub fn get_cache_item_new<'a>(
+    path: &Path,
+    cache: &'a mut Cache,
+) -> Result<(String, &'a CacheItem)> {
+    let file_stem = String::from(
+        path.file_stem()
+            .and_then(OsStr::to_str)
+            .expect("Failed to get convert path file ext to valid unicode."),
+    );
+
+    // id of the asset (to be used to update the cache link)
+    let id = if file_stem == "collection" {
+        String::from("-1")
+    } else {
+        String::from("0")
+    };
+    let cache_item: &CacheItem = cache
+        .items
+        .get(&id)
+        .ok_or_else(|| anyhow!("Failed to get config item at index '{}'", id))?;
+
+    Ok((id, cache_item))
+}
+
 pub fn get_data_size(assets_dir: &Path, extension: &str) -> Result<u64> {
     let path = assets_dir
         .join(format!("*.{extension}"))
@@ -106,9 +131,10 @@ pub fn list_files(assets_dir: &str, include_collection: bool) -> Result<Vec<DirE
                 .expect("Failed to convert file name to valid unicode.");
 
             let is_collection = include_collection && file_stem == "collection";
+            let is_media = file_stem == "media";
             let is_numeric = file_stem.chars().all(|c| c.is_ascii_digit());
 
-            is_file && (is_numeric || is_collection)
+            is_file && (is_numeric || is_collection || is_media)
         });
 
     Ok(files.collect())
@@ -120,11 +146,7 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
 
     let paths = filtered_files
         .into_iter()
-        .map(|entry| {
-            let file_name_as_string =
-                String::from(entry.path().file_name().unwrap().to_str().unwrap());
-            file_name_as_string
-        })
+        .map(|entry| String::from(entry.path().file_name().unwrap().to_str().unwrap()))
         .collect::<Vec<String>>();
 
     let mut asset_pairs: HashMap<isize, AssetPair> = HashMap::new();
@@ -138,7 +160,10 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
     // invalid file names before entering metadata filename loop
     for x in paths_ref {
         if let Some(captures) = animation_exists_regex.captures(x) {
-            if &captures[1] != "collection" && captures[1].parse::<usize>().is_err() {
+            if &captures[1] != "collection"
+                && &captures[1] != "media"
+                && captures[1].parse::<usize>().is_err()
+            {
                 let error = anyhow!("Couldn't parse filename '{}' to a valid index number.", x);
                 error!("{:?}", error);
                 return Err(error);
@@ -154,10 +179,75 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
 
     ensure_sequential_files(metadata_filenames.clone())?;
 
+    // pulling image and animation logic out of loop since they remain constant over assets
+    let img_pattern = format!("^{}\\.((jpg)|(jpeg)|(gif)|(png))$", "media");
+    let img_regex = RegexBuilder::new(&img_pattern)
+        .case_insensitive(true)
+        .build()
+        .expect("Failed to create regex.");
+    let img_filenames = paths_ref
+        .clone()
+        .into_iter()
+        .filter(|p| img_regex.is_match(p))
+        .collect::<Vec<String>>();
+
+    if img_filenames.len() != 1 {
+        let error = anyhow!("Couldn't find an image filename: media.<EXT>");
+        error!("{:?}", error);
+        return Err(error);
+    }
+
+    // need a similar check for animation as above, this one checking if there is animation
+    // on specific index
+
+    let animation_pattern = format!("^{}\\.((mp3)|(mp4)|(mov)|(webm)|(glb))$", "media");
+    let animation_regex = RegexBuilder::new(&animation_pattern)
+        .case_insensitive(true)
+        .build()
+        .expect("Failed to create regex.");
+
+    let animation_filenames = paths_ref
+        .clone()
+        .into_iter()
+        .filter(|p| animation_regex.is_match(p))
+        .collect::<Vec<String>>();
+
+    let animation_filename = if animation_filenames.len() == 1 {
+        let animation_filepath = Path::new(assets_dir)
+            .join(&animation_filenames[0])
+            .to_str()
+            .expect("Failed to convert image path from unicode.")
+            .to_string();
+
+        Some(animation_filepath)
+    } else {
+        None
+    };
+
+    let collection_pattern = format!("^{}\\.((jpg)|(jpeg)|(gif)|(png))$", "collection");
+    let collection_regex = RegexBuilder::new(&collection_pattern)
+        .case_insensitive(true)
+        .build()
+        .expect("Failed to create regex.");
+    let collection_filenames = paths_ref
+        .clone()
+        .into_iter()
+        .filter(|p| collection_regex.is_match(p))
+        .collect::<Vec<String>>();
+
+    if collection_filenames.len() != 1 {
+        let error = anyhow!("Couldn't find an collection filename: collection.<EXT>");
+        error!("{:?}", error);
+        return Err(error);
+    }
+
     for metadata_filename in metadata_filenames {
         let i = metadata_filename.split('.').next().unwrap();
-        let is_collection_index = i == "collection";
+        if i == "media" {
+            continue;
+        }
 
+        let is_collection_index = i == "collection";
         let index: isize = if is_collection_index {
             -1
         } else if let Ok(index) = i.parse::<isize>() {
@@ -171,48 +261,11 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
             return Err(error);
         };
 
-        let img_pattern = format!("^{}\\.((jpg)|(jpeg)|(gif)|(png))$", i);
-
-        let img_regex = RegexBuilder::new(&img_pattern)
-            .case_insensitive(true)
-            .build()
-            .expect("Failed to create regex.");
-
-        let img_filenames = paths_ref
-            .clone()
-            .into_iter()
-            .filter(|p| img_regex.is_match(p))
-            .collect::<Vec<String>>();
-
-        let img_filename = if img_filenames.len() != 1 {
-            let error = if is_collection_index {
-                anyhow!("Couldn't find the collection image filename.")
-            } else {
-                anyhow!(
-                    "Couldn't find an image filename at index {}.",
-                    i.parse::<isize>().unwrap()
-                )
-            };
-            error!("{:?}", error);
-            return Err(error);
+        let img_filename = if is_collection_index {
+            &collection_filenames[0]
         } else {
             &img_filenames[0]
         };
-
-        // need a similar check for animation as above, this one checking if there is animation
-        // on specific index
-
-        let animation_pattern = format!("^{}\\.((mp3)|(mp4)|(mov)|(webm)|(glb))$", i);
-        let animation_regex = RegexBuilder::new(&animation_pattern)
-            .case_insensitive(true)
-            .build()
-            .expect("Failed to create regex.");
-
-        let animation_filenames = paths_ref
-            .clone()
-            .into_iter()
-            .filter(|p| animation_regex.is_match(p))
-            .collect::<Vec<String>>();
 
         let metadata_filepath = Path::new(assets_dir)
             .join(&metadata_filename)
@@ -232,18 +285,6 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
             .expect("Failed to convert image path from unicode.")
             .to_string();
 
-        let animation_filename = if animation_filenames.len() == 1 {
-            let animation_filepath = Path::new(assets_dir)
-                .join(&animation_filenames[0])
-                .to_str()
-                .expect("Failed to convert image path from unicode.")
-                .to_string();
-
-            Some(animation_filepath)
-        } else {
-            None
-        };
-
         let animation_hash = if let Some(animation_file) = &animation_filename {
             let encoded_filename = encode(animation_file)?;
             Some(encoded_filename)
@@ -257,8 +298,17 @@ pub fn get_asset_pairs(assets_dir: &str) -> Result<HashMap<isize, AssetPair>> {
             metadata_hash: encode(&metadata_filepath)?,
             image: img_filepath.clone(),
             image_hash: encode(&img_filepath)?,
-            animation_hash,
-            animation: animation_filename,
+            // collection doesnt need animation (only image required)
+            animation_hash: if is_collection_index {
+                None
+            } else {
+                animation_hash
+            },
+            animation: if is_collection_index {
+                None
+            } else {
+                animation_filename.clone()
+            },
         };
 
         asset_pairs.insert(index, asset_pair);
@@ -287,7 +337,7 @@ pub fn encode(file: &str) -> Result<String> {
 fn ensure_sequential_files(metadata_filenames: Vec<String>) -> Result<()> {
     let mut metadata_indices = metadata_filenames
         .into_iter()
-        .filter(|f| !f.starts_with("collection"))
+        .filter(|f| !f.starts_with("collection") && !f.starts_with("media"))
         .map(|f| {
             f.split('.')
                 .next()
