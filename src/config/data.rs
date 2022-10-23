@@ -20,7 +20,7 @@ use mpl_token_metadata::state;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::config::errors::*;
-
+#[derive(Debug)]
 pub struct SugarConfig {
     pub keypair: Keypair,
     pub rpc_url: String,
