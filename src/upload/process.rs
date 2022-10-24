@@ -302,7 +302,6 @@ pub async fn process_upload(args: UploadArgs) -> Result<()> {
             }
         );
 
-        println!("\n\nMETADATA {:#?}\n\n", indices.metadata);
         if !indices.metadata.is_empty() {
             errors.extend(
                 upload_data(
