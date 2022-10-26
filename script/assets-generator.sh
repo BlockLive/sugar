@@ -25,6 +25,7 @@ read -r -d $'\0' METADATA <<-EOM
 EOM
 
 ITEMS="1000"
+ITEMS="30"
 NAME_PASSED="Saga Launch"
 SYMBOL="SAGA"
 DESCRIPTION="Saga launch event"
