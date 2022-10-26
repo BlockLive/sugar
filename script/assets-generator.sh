@@ -25,9 +25,9 @@ read -r -d $'\0' METADATA <<-EOM
 EOM
 
 ITEMS="30"
-NAME_PASSED="Backyard Pickleball"
-SYMBOL="BKPB"
-DESCRIPTION="Inaugural Charity Event"
+NAME_PASSED="Saga Launch"
+SYMBOL="SAGA"
+DESCRIPTION="Saga launch event"
 ANIMATION="1"
 ATTRIBUTES="[{\"trait_type\": \"Orientation\", \"value\": \"Spinning\"}],"
 EXT="png"
