@@ -28,7 +28,7 @@ pub struct UploadArgs {
     pub cache: String,
     pub interrupted: Arc<AtomicBool>,
 }
-
+#[derive(Debug)]
 pub struct AssetType {
     pub image: Vec<isize>,
     pub metadata: Vec<isize>,
@@ -227,7 +227,7 @@ pub async fn process_upload(args: UploadArgs) -> Result<()> {
 
         if !indices.image.is_empty() {
             errors.extend(
-                upload_data(
+                upload_media(
                     &sugar_config,
                     &asset_pairs,
                     &mut cache,
@@ -263,7 +263,7 @@ pub async fn process_upload(args: UploadArgs) -> Result<()> {
 
         if !indices.animation.is_empty() {
             errors.extend(
-                upload_data(
+                upload_media(
                     &sugar_config,
                     &asset_pairs,
                     &mut cache,
@@ -410,6 +410,126 @@ pub async fn process_upload(args: UploadArgs) -> Result<()> {
     }
 
     Ok(())
+}
+
+// uploads one image and animation for n tickets instead of upload_data's n images and n animtions
+async fn upload_media(
+    sugar_config: &SugarConfig,
+    asset_pairs: &HashMap<isize, AssetPair>,
+    cache: &mut Cache,
+    indices: &[isize],
+    data_type: DataType,
+    uploader: &dyn Uploader,
+    interrupted: Arc<AtomicBool>,
+) -> Result<Vec<UploadError>> {
+    let mut extension = HashSet::with_capacity(1);
+    let mut paths = Vec::new();
+    for index in indices {
+        let item = match asset_pairs.get(index) {
+            Some(asset_index) => asset_index,
+            None => return Err(anyhow::anyhow!("Failed to get asset at index {}", index)),
+        };
+        // chooses the file path based on the data type
+        let file_path = match data_type {
+            DataType::Image => item.image.clone(),
+            DataType::Animation => {
+                if let Some(animation) = item.animation.clone() {
+                    animation
+                } else {
+                    return Err(anyhow::anyhow!(
+                        "Missing animation path for asset at index {}",
+                        index
+                    ));
+                }
+            }
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "Expected media file type received {:?}",
+                    data_type
+                ))
+            }
+        };
+
+        let path = Path::new(&file_path);
+        let ext = path
+            .extension()
+            .and_then(OsStr::to_str)
+            .expect("Failed to convert extension from unicode");
+        extension.insert(String::from(ext));
+
+        // image and animation paths are identical
+        if !paths.contains(&file_path) {
+            paths.push(file_path);
+        }
+    }
+    // validates that all files have the same extension
+    let extension = if extension.len() == 1 {
+        extension.iter().next().unwrap()
+    } else {
+        return Err(anyhow!("Invalid file extension: {:?}", extension));
+    };
+
+    // validates at most 2 files (media and collection)
+    if paths.len() > 2 {
+        return Err(anyhow!("Invalid file extension: {:?}", extension));
+    };
+
+    let content_type = match data_type {
+        DataType::Image => format!("image/{}", extension),
+        DataType::Animation => format!("video/{}", extension),
+        DataType::Metadata => {
+            return Err(anyhow::anyhow!(
+                "Expected media file type received {:?}",
+                data_type
+            ))
+        }
+    };
+
+    println!("\nSending data: (Ctrl+C to abort)");
+
+    let pb = progress_bar_with_style(paths.len() as u64);
+
+    let mut assets = Vec::new();
+    // get cache items
+    for file_path in paths {
+        // path to the media/metadata file
+        let path = Path::new(&file_path);
+        let file_name = String::from(
+            path.file_name()
+                .and_then(OsStr::to_str)
+                .expect("Filed to get file name."),
+        );
+        let item = get_cache_item_new(path, cache)?;
+
+        assets.push(AssetInfo {
+            asset_id: item.0,
+            name: file_name.clone(),
+            content: file_path.clone(),
+            data_type: data_type.clone(),
+            content_type: content_type.clone(),
+        });
+    }
+    let errors = uploader
+        .upload(
+            sugar_config,
+            cache,
+            data_type,
+            &mut assets,
+            &pb,
+            interrupted,
+        )
+        .await?;
+
+    if !errors.is_empty() {
+        pb.abandon_with_message(format!("{}", style("Upload failed ").red().bold()));
+    } else {
+        pb.finish_with_message(format!("{}", style("Upload successful ").green().bold()));
+    }
+
+    // makes sure the cache file is updated
+    cache.sync_file()?;
+
+    Ok(errors)
 }
 
 /// Upload the data to the selected storage.
