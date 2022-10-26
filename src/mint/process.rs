@@ -430,7 +430,7 @@ pub async fn mint(
             recent_blockhashes: sysvar::recent_blockhashes::ID,
             instruction_sysvar_account: sysvar::instructions::ID,
         })
-        .args(nft_instruction::MintNft { creator_bump });
+        .args(nft_instruction::MintNft { creator_bump, uri: String::from("www.google.com") });
 
     // Add additional accounts directly to the mint instruction otherwise it won't work.
     if !additional_accounts.is_empty() {
